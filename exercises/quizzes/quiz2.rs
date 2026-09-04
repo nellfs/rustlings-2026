@@ -26,6 +26,29 @@ enum Command {
 mod my_module {
     use super::Command;
 
+    pub fn transformer(input: Vec<(String, Command)>) -> Vec<String> {
+        let mut result: Vec<String> = Vec::new();
+
+        for (text, command) in input {
+            let output = match command {
+                Command::Uppercase => text.to_uppercase(),
+                Command::Trim => text.trim().to_string(),
+                Command::Append(times) => {
+                    // for this one the rustlings answer is simpler
+                    // I did not know that I could just append with the
+                    // '+' operator :P
+                    let mut text_clone = text.clone();
+                    let bar = String::from("bar").repeat(times);
+                    text_clone.push_str(&bar);
+                    text_clone
+                }
+            };
+            result.push(output);
+        }
+
+        result
+    }
+
     // TODO: Complete the function as described above.
     // pub fn transformer(input: ???) -> ??? { ??? }
 }
@@ -39,6 +62,7 @@ mod tests {
     // TODO: What do we need to import to have `transformer` in scope?
     // use ???;
     use super::Command;
+    use super::my_module::transformer;
 
     #[test]
     fn it_works() {
