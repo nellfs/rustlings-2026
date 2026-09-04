@@ -31,6 +31,40 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
         // Keep in mind that goals scored by team 1 will be the number of goals
         // conceded by team 2. Similarly, goals scored by team 2 will be the
         // number of goals conceded by team 1.
+
+        let team1 = TeamScores {
+            goals_scored: team_1_score,
+            goals_conceded: team_2_score,
+        };
+
+        let team2 = TeamScores {
+            goals_scored: team_2_score,
+            goals_conceded: team_1_score,
+        };
+
+        scores
+            .entry(team_1_name)
+            .and_modify(|team_score| team_score.goals_scored += team1.goals_scored)
+            .or_insert(team1);
+
+        scores
+            .entry(team_2_name)
+            .and_modify(|team_score| {
+                team_score.goals_conceded += team2.goals_conceded;
+                team_score.goals_scored += team2.goals_scored
+            })
+            .or_insert(team2);
+
+        // that was the first solution I got in mind, but the Rustling solution is way simpler:
+        // let team_1 = scores.entry(team_1_name).or_default(); ---> the or_default() function initializes
+        // // Update the values.                                     the hashmap with zero values and returns
+        // team_1.goals_scored += team_1_score;                      a mutable reference to the entry value
+        // team_1.goals_conceded += team_2_score; <-- so this is affecting the real underlying score hashmap >:)
+
+        // // Similarly for the second team.
+        // let team_2 = scores.entry(team_2_name).or_default();
+        // team_2.goals_scored += team_2_score;
+        // team_2.goals_conceded += team_1_score;
     }
 
     scores
@@ -54,9 +88,11 @@ England,Spain,1,0";
     fn build_scores() {
         let scores = build_scores_table(RESULTS);
 
-        assert!(["England", "France", "Germany", "Italy", "Poland", "Spain"]
-            .into_iter()
-            .all(|team_name| scores.contains_key(team_name)));
+        assert!(
+            ["England", "France", "Germany", "Italy", "Poland", "Spain"]
+                .into_iter()
+                .all(|team_name| scores.contains_key(team_name))
+        );
     }
 
     #[test]
